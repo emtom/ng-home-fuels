@@ -1,6 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ThemeService } from '../../../services/theme.service';
 
 @Component({
   selector: 'app-navigation',
@@ -12,21 +13,21 @@ import { AuthService } from '../../../services/auth.service';
 export class NavigationComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private themeService = inject(ThemeService);
   
   // Auth state
   user = this.authService.user;
   isAuthenticated = this.authService.isAuthenticated;
 
-  // Dark mode state
-  isDarkMode = false;
+  isDarkModeComputed = computed(() => {
+    const theme = this.themeService.theme();
+    return theme === 'dark';
+  });
 
-  // Avatar menu state
   isAvatarMenuOpen = false;
 
-  // Mobile menu state
   isMobileMenuOpen = false;
 
-  // Computed user initials
   userInitials = computed(() => {
     const currentUser = this.user();
     if (!currentUser) return 'U';
@@ -44,9 +45,7 @@ export class NavigationComponent {
   });
 
   toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    // TODO: Implement actual dark mode functionality
-    // This could involve updating CSS classes or using a theme service
+    this.themeService.toggleTheme();
   }
 
   toggleAvatarMenu() {
