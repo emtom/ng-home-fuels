@@ -1,5 +1,5 @@
 import { Injectable, WritableSignal, computed, inject, signal } from '@angular/core';
-import { Auth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signOut, User, setPersistence, browserLocalPersistence, onAuthStateChanged } from '@angular/fire/auth';
+import { Auth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, signOut, User, setPersistence, browserLocalPersistence, onAuthStateChanged, createUserWithEmailAndPassword, updateProfile, signInWithEmailAndPassword } from '@angular/fire/auth';
 
 export interface IAuthUser extends User {};
 
@@ -23,6 +23,26 @@ export class AuthService {
     onAuthStateChanged(this.auth, (user) => {
       this.state.set({ user });
     });
+  }
+
+  async registerWithEmail(email: string, password: string, displayName?: string) {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
+      
+      if (displayName && userCredential.user) {
+        await updateProfile(userCredential.user, {
+          displayName: displayName
+        });
+      }
+      
+      return userCredential;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async loginWithEmail(email: string, password: string) {
+    await signInWithEmailAndPassword(this.auth, email, password);
   }
 
   async loginWithGoogle() {

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-register',
@@ -14,6 +15,7 @@ export class RegisterComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
 
   registerForm: FormGroup;
 
@@ -21,7 +23,7 @@ export class RegisterComponent {
     this.registerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(24)]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(24)]],
       confirmPassword: ['', [Validators.required]],
       acceptTerms: [false, [Validators.requiredTrue]]
     }, { validators: this.passwordMatchValidator });
@@ -43,34 +45,38 @@ export class RegisterComponent {
     if (this.registerForm.valid) {
       try {
         const { name, email, password } = this.registerForm.value;
-        // TODO: Implement email/password registration with Firebase
-        console.log('Email registration:', { name, email, password });
-        
-        // For now, just navigate to dashboard
-        await this.router.navigate(['/dashboard']);
-      } catch (error) {
+        await this.authService.registerWithEmail(email, password, name);
+        this.toastService.success('Konto zostało utworzone pomyślnie!');
+        await this.router.navigate(['/auth/login']);
+      } catch (error: any) {
         console.error('Email registration failed:', error);
+        this.toastService.error(`Błąd rejestracji: ${error.message || 'Nieznany błąd'}`);
       }
     } else {
       this.markFormGroupTouched();
+      this.toastService.warning('Proszę poprawić błędy w formularzu');
     }
   }
 
   async registerWithGoogle() {
     try {
       await this.authService.loginWithGoogle();
+      this.toastService.success('Zalogowano przez Google!');
       await this.router.navigate(['/dashboard']);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Google registration failed:', error);
+      this.toastService.error(`Błąd logowania przez Google: ${error.message || 'Nieznany błąd'}`);
     }
   }
 
   async registerWithFacebook() {
     try {
       await this.authService.loginWithFacebook();
+      this.toastService.success('Zalogowano przez Facebook!');
       await this.router.navigate(['/dashboard']);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Facebook registration failed:', error);
+      this.toastService.error(`Błąd logowania przez Facebook: ${error.message || 'Nieznany błąd'}`);
     }
   }
 
