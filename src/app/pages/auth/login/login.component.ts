@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { ToastService } from '../../../services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
+  private toastService = inject(ToastService);
 
   loginForm: FormGroup;
 
@@ -28,12 +30,9 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       try {
         const { email, password } = this.loginForm.value;
-        // TODO: Implement email/password login with Firebase
-        console.log('Email login:', { email, password });
-        // For now, just navigate to dashboard
-        await this.router.navigate(['/dashboard']);
+        await this.authService.loginWithEmail(email, password);
       } catch (error) {
-        console.error('Email login failed:', error);
+        this.toastService.error('Błąd logowania');
       }
     } else {
       this.markFormGroupTouched();
@@ -45,7 +44,7 @@ export class LoginComponent {
       await this.authService.loginWithGoogle();
       await this.router.navigate(['/dashboard']);
     } catch (error) {
-      console.error('Google login failed:', error);
+      this.toastService.error('Błąd logowania');
     }
   }
 
@@ -54,7 +53,7 @@ export class LoginComponent {
       await this.authService.loginWithFacebook();
       await this.router.navigate(['/dashboard']);
     } catch (error) {
-      console.error('Facebook login failed:', error);
+      this.toastService.error('Błąd logowania');
     }
   }
 
