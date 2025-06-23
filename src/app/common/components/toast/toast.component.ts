@@ -32,7 +32,7 @@ export class ToastComponent {
         return `${baseClasses} bg-red-500 text-white`;
       case 'default':
       default:
-        return `${baseClasses} bg-white text-gray-800 border border-gray-200`;
+        return `${baseClasses} bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700`;
     }
   }
 
